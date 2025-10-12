@@ -10,6 +10,7 @@ const router = express.Router();
 // For Auth (login)
 router.post('/users/signup', upload.single('profileImage'), authController.signup);
 router.post('/users/login', authController.login);
+router.get('/users/logout', authController.logout);
 
 // For Event (Create/Get/Update/Delete)
 router.get('/events', eventController.getAllEvents);

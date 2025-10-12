@@ -48,7 +48,8 @@ exports.createEvent = async (req, res) => {
 // --- สำหรับทุกคน: ดูอีเวนต์ทั้งหมด ---
 exports.getAllEvents = async (req, res) => {
     try {
-        const events = await Event.find().populate('organizer', 'name email'); // แสดงข้อมูล organizer บางส่วน
+        const events = await Event.find().populate('organizer', 'firstName lastName email'); // <-- ★★★ แก้ไข
+
 
         res.status(200).json({
             status: 'success',
@@ -65,7 +66,8 @@ exports.getAllEvents = async (req, res) => {
 // --- สำหรับทุกคน: ดูอีเวนต์เดียว ---
 exports.getEvent = async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id).populate('organizer', 'name email profileImage');
+        const event = await Event.findById(req.params.id).populate('organizer', 'firstName lastName email profileImage');
+
 
         if (!event) {
             return res.status(404).json({ status: 'fail', message: 'No event found with that ID' });

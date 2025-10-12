@@ -5,6 +5,7 @@ const path = require('path');
 const apiRoutes = require('./src/routes/apiRoutes.js');
 const viewRoutes = require('./src/routes/viewRoutes.js');
 const cloudinary = require('cloudinary');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -16,12 +17,13 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.set('view engine', 'ejs');
-app.set('views', 'views');
-
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use('/api/v1', apiRoutes);
 app.use('/', viewRoutes);

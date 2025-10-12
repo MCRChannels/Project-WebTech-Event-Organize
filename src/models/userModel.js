@@ -3,9 +3,22 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
-        required: true
+        required: true,
+        trim: true
+    },
+    lastName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
     },
     email: {
         type: String,
@@ -21,7 +34,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['attendee', 'organizer'],
+        enum: ['attendee', 'organizer', 'admin'],
         default: 'attendee'
     },
     password: {
@@ -29,11 +42,19 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 8,
         select: false
+    },
+    walletBalance: {
+        type: Number,
+        default: 0
     }
 },
     {
         timestamps: true
     })
+
+userSchema.virtual('fullName').get(function () {
+    return `${this.firstName} ${this.lastName}`;
+});
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
