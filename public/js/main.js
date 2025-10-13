@@ -183,4 +183,102 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } 
+
+    const createEventForm = document.getElementById('create-event-form');
+    if (createEventForm) {
+        createEventForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById('create-event-error');
+            const formData = new FormData();
+
+            formData.append('name', document.getElementById('name').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('date', document.getElementById('date').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('ticketAvailable', document.getElementById('ticketAvailable').value);
+            formData.append('price', document.getElementById('price').value);
+            
+            const imageFile = document.getElementById('imageUrl').files[0];
+            if (imageFile) {
+                formData.append('imageUrl', imageFile);
+            }
+
+            try {
+                const res = await fetch('/api/v1/events', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert('Event created successfully!');
+                    window.location.assign('/dashboard'); // ไปยังหน้า Dashboard
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Something went wrong. Please try again.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    }
+
+    // 2. Update Profile Form Logic
+    const updateProfileForm = document.getElementById('update-profile-form');
+    if(updateProfileForm) {
+        updateProfileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const successDiv = document.getElementById('update-success');
+            const updatedData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+            };
+
+            try {
+                const res = await fetch('/api/v1/users/updateMe', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    successDiv.classList.remove('d-none');
+                    setTimeout(() => successDiv.classList.add('d-none'), 3000);
+                } else {
+                    alert(`Update failed: ${data.message}`);
+                }
+            } catch(err) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    }
+
+    // 3. Delete Event Button Logic
+    const deleteButtons = document.querySelectorAll('.delete-event-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const eventId = e.target.dataset.eventId;
+            const confirmed = confirm('Are you sure you want to delete this event? This action cannot be undone.');
+
+            if (confirmed) {
+                try {
+                    const res = await fetch(`/api/v1/events/${eventId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (res.status === 204) {
+                        alert('Event deleted successfully.');
+                        location.reload();
+                    } else {
+                        const data = await res.json();
+                        alert(`Error: ${data.message}`);
+                    }
+                } catch (err) {
+                    alert('An error occurred. Please try again.');
+                }
+            }
+        });
+    });
 }); 
