@@ -19,4 +19,25 @@ router.get('/profile', authController.protectView, viewController.getProfilePage
 
 router.get('/my-bookings', authController.protectView, viewController.getMyBookingsPage);
 
+router.get(
+  '/admin-panel',
+  authController.protectView,
+  authController.restrictViewTo('admin'),
+  viewController.getAdminPanelPage
+);
+
+router.get(
+  '/dashboard',
+  authController.protectView,
+  authController.restrictViewTo('organizer'),
+  viewController.getDashboardPage
+);
+
+router.get(
+  '/edit-event/:id',
+  authController.protectView,
+  authController.restrictViewTo('organizer'),
+  viewController.getEditEventForm
+);
+
 module.exports = router;
