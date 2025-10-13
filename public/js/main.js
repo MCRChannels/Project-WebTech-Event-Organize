@@ -1,5 +1,3 @@
-// public/js/main.js
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Login Form Logic ---
@@ -109,6 +107,75 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const roleSelects = document.querySelectorAll('.user-role-select');
+    roleSelects.forEach(select => {
+        select.addEventListener('change', (e) => {
+            const userId = e.target.dataset.userId;
+            const saveButton = document.querySelector(`.save-role-btn[data-user-id="${userId}"]`);
+            if (saveButton) {
+                saveButton.classList.remove('d-none');
+            }
+        });
+    });
+
+    // Logic for saving the new role
+    const saveRoleButtons = document.querySelectorAll('.save-role-btn');
+    saveRoleButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const userId = e.target.dataset.userId;
+            const roleSelect = document.querySelector(`.user-role-select[data-user-id="${userId}"]`);
+            const newRole = roleSelect.value;
+
+            try {
+                const res = await fetch(`/api/v1/users/${userId}/role`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: newRole })
+                });
+
+                if (res.ok) {
+                    alert('User role updated successfully!');
+                    e.target.classList.add('d-none');
+                } else {
+                    const data = await res.json();
+                    alert(`Error: ${data.message}`);
+                }
+            } catch (err) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    });
+
+    // Logic for admin to delete an event
+    const adminDeleteButtons = document.querySelectorAll('.admin-delete-event-btn');
+    adminDeleteButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            // ใช้ currentTarget เพื่อให้แน่ใจว่าเราได้ตัว button จริงๆ แม้จะคลิกที่ icon
+            const currentButton = e.currentTarget;
+            const eventId = currentButton.dataset.eventId;
+            const confirmed = confirm('ADMIN ACTION: Are you sure you want to permanently delete this event?');
+
+            if (confirmed) {
+                try {
+                    const res = await fetch(`/api/v1/events/${eventId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (res.status === 204) {
+                        alert('Event deleted successfully by admin.');
+                        // ลบแถวของอีเวนต์นั้นออกจากตาราง
+                        currentButton.closest('tr').remove();
+                    } else {
+                        const data = await res.json();
+                        alert(`Error: ${data.message}`);
+                    }
+                } catch (err) {
+                    alert('An error occurred. Please try again.');
+                }
+            }
+        });
+    });
 
     const eventDetailModal = document.getElementById('eventDetailModal');
     if (eventDetailModal) {
