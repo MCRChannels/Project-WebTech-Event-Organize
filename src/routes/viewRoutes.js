@@ -15,4 +15,8 @@ router.get(
   viewController.getCreateEventForm // 3. ถ้าผ่านหมด ค่อย Render หน้าฟอร์ม
 );
 
+router.get('/profile', authController.protectView, viewController.getProfilePage);
+
+router.get('/my-bookings', authController.protectView, viewController.getMyBookingsPage);
+
 module.exports = router;
