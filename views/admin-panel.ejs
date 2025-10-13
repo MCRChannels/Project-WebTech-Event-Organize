@@ -1,0 +1,96 @@
+<%- include('partials/header') %>
+
+<h1>Admin Panel</h1>
+<p>Welcome, Admin. Here you can manage all users and events in the system.</p>
+<hr>
+
+<div class="card mb-5">
+    <div class="card-header">
+        <h3><i class="fas fa-users"></i> Manage Users (<%= users.length %>)</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Wallet (THB)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.firstName %> <%= user.lastName %></td>
+                            <td><%= user.email %></td>
+                            <td>
+                                <% if (user.role !== 'admin') { %>
+                                    <select class="form-select form-select-sm user-role-select" data-user-id="<%= user._id %>">
+                                        <option value="attendee" <%= user.role === 'attendee' ? 'selected' : '' %>>Attendee</option>
+                                        <option value="organizer" <%= user.role === 'organizer' ? 'selected' : '' %>>Organizer</option>
+                                    </select>
+                                <% } else { %>
+                                    <span class="badge bg-primary">Admin</span>
+                                <% } %>
+                            </td>
+                            <td><%= user.walletBalance.toLocaleString('en-US') %></td>
+                            <td>
+                                <% if (user.role !== 'admin') { %>
+                                    <button class="btn btn-sm btn-success save-role-btn d-none" data-user-id="<%= user._id %>">Save</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-calendar-alt"></i> Manage Events (<%= events.length %>)</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Organizer</th>
+                        <th>Date</th>
+                        <th>Tickets Left</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% events.forEach(event => { %>
+                        <tr>
+                            <td><%= event.name %></td>
+                            <td>
+                                <% if (event.organizer) { %>
+                                    <%= event.organizer.firstName %> <%= event.organizer.lastName %>
+                                <% } else { %>
+                                    <span class="text-danger">Organizer Not Found</span>
+                                <% } %>
+                            </td>
+                            <td><%= new Date(event.date).toLocaleDateString('th-TH') %></td>
+                            <td><%= event.ticketAvailable %></td>
+                            <td>
+                                <button class="btn btn-sm btn-danger admin-delete-event-btn" data-event-id="<%= event._id %>">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<%- include('partials/footer') %>
