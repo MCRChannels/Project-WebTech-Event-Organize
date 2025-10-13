@@ -17,6 +17,13 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ status: 'fail', message: 'Sorry, this event is sold out.' });
     }
 
+    if (req.user.walletBalance < event.price) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Insufficient funds in your wallet.'
+      });
+    }
+
 
     const newBooking = await Booking.create({
       event: eventId,
@@ -24,9 +31,12 @@ exports.createBooking = async (req, res) => {
       price: event.price    
     });
 
+    req.user.walletBalance -= event.price;
 
-    event.ticketsAvailable -= 1;
-    await event.save();
+    event.ticketAvailable -= 1;
+
+    await req.user.save({ validateBeforeSave: false });
+    await event.save(); 
 
     res.status(201).json({
       status: 'success',

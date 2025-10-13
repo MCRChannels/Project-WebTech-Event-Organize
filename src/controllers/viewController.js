@@ -1,4 +1,5 @@
 const Event = require('../models/eventModel');
+const Booking = require('../models/bookingModel');
 
 exports.getHomepage = async (req, res) => {
     try {
@@ -19,8 +20,29 @@ exports.getLoginForm = (req, res) => {
     });
 };
 
+exports.getProfilePage = (req, res) => {
+    res.render('profile', {
+        pageTitle: 'My Profile'
+    });
+};
+
+exports.getMyBookingsPage = async (req, res) => {
+    const bookings = await Booking.find({ attendee: req.user.id }).populate('event');
+    try {
+        res.render('my-bookings', {
+            pageTitle: 'My Bookings',
+            bookings: bookings
+        });
+    } catch (error) {
+        res.render('my-bookings', {
+            pageTitle: 'My Bookings',
+            booings: []
+        })
+    }
+};
+
 exports.getCreateEventForm = (req, res) => {
-  res.render('create-event', {
-    pageTitle: 'Create a New Event'
-  });
+    res.render('create-event', {
+        pageTitle: 'Create a New Event'
+    });
 };

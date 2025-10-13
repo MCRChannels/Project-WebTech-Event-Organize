@@ -124,6 +124,7 @@ exports.isLoggedIn = async (req, res, next) => {
       // THERE IS A LOGGED IN USER
       // ★★★ ส่งข้อมูล user ไปให้ทุก Template ที่จะ render ★★★
       res.locals.user = currentUser;
+      req.user = currentUser;   
       return next();
     } catch (err) {
       return next(); // ถ้า token ผิดพลาด ก็ไม่ต้องทำอะไร ให้ผ่านไปเฉยๆ

@@ -2,47 +2,47 @@ const Event = require('../models/eventModel');
 const cloudinary = require('../config/cloudinaryConfig.js');
 
 exports.createEvent = async (req, res) => {
-  try {
+    try {
 
-    const eventData = {
-      name: req.body.name,
-      description: req.body.description,
-      date: req.body.date,
-      location: req.body.location,
-      ticketAvailable: req.body.ticketAvailable, 
-      price: req.body.price,
-      organizer: req.user.id
-    };
+        const eventData = {
+            name: req.body.name,
+            description: req.body.description,
+            date: req.body.date,
+            location: req.body.location,
+            ticketAvailable: req.body.ticketAvailable, 
+            price: req.body.price,
+            organizer: req.user.id
+        };
 
 
     if (req.file) {
-      const b64 = Buffer.from(req.file.buffer).toString('base64');
-      let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
+        const b64 = Buffer.from(req.file.buffer).toString('base64');
+        let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
 
-      const result = await cloudinary.uploader.upload(dataURI, {
-        folder: 'event-ticketing/event_images'
-      });
+        const result = await cloudinary.uploader.upload(dataURI, {
+            folder: 'event-ticketing/event_images'
+        });
 
-      eventData.imageUrl = result.secure_url;
-    } else {
-      return res.status(400).json({ status: 'fail', message: 'Event image is required.' });
+        eventData.imageUrl = result.secure_url;
+        } else {
+            return res.status(400).json({ status: 'fail', message: 'Event image is required.' });
     }
 
     const newEvent = await Event.create(eventData);
 
     res.status(201).json({
-      status: 'success',
-      data: {
-        event: newEvent
-      }
+        status: 'success',
+        data: {
+            event: newEvent
+        }
     });
-  } catch (error) {
-    console.error('CREATE EVENT ERROR:', error);
-    res.status(400).json({
-      status: 'fail',
-      message: error.message
-    });
-  }
+    } catch (error) {
+        console.error('CREATE EVENT ERROR:', error);
+        res.status(400).json({
+        status: 'fail',
+        message: error.message
+        });
+    }
 };
 
 // --- สำหรับทุกคน: ดูอีเวนต์ทั้งหมด ---
