@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<h1>My Bookings</h1>
+<p>Here are all the events you've booked.</p>
+<hr>
+
+<div class="list-group">
+    <% if (bookings && bookings.length > 0) { %>
+        <% bookings.forEach(booking => { %>
+            <div class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1"><%= booking.event.name %></h5>
+                    <small>Booked on: <%= new Date(booking.bookingDate).toLocaleDateString('th-TH') %></small>
+                </div>
+                <p class="mb-1"><strong>Location:</strong> <%= booking.event.location %></p>
+                <p class="mb-1"><strong>Event Date:</strong> <%= new Date(booking.event.date).toLocaleDateString('th-TH') %></p>
+                <small><strong>Price Paid:</strong> <%= booking.price.toLocaleString('en-US') %> THB</small>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="alert alert-info">You haven't booked any events yet.</div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
