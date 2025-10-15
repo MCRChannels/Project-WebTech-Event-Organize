@@ -1,266 +1,310 @@
-.card-description {
-    min-height: 80px; 
-}
-
-:root {
-    --primary-color: #2F4275;
-    --secondary-color: #2575fc;
-    --background-color: #f4f7fc;
-    --text-color: #333;
-    --card-bg: #ffffff;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --border-radius: 8px;
-}
-
 body {
     font-family: 'Poppins', sans-serif;
-    margin: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
+    background-color: #f8f9fa;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+/* 2. Hero Section Styling */
+.hero-section {
+    position: relative;
+    height: 70vh;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    overflow: hidden;
+    color: white;
 }
-
-/* Navbar */
-.navbar {
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    padding: 1rem 0;
-    position: sticky;
+.hero-overlay {
+    position: absolute;
     top: 0;
-    z-index: 1000;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2));
+    z-index: 1;
 }
-
-.navbar .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 }
-
-.navbar-brand {
-    font-size: 1.5rem;
+.hero-content h1 {
+    font-size: 4rem;
     font-weight: 700;
-    text-decoration: none;
-    color: var(--primary-color);
+    text-transform: uppercase;
+}
+.hero-content .lead {
+    font-size: 1.25rem;
+}
+#hero-countdown span:first-child {
+    font-size: 4rem;
+    font-weight: 700;
+}
+#hero-countdown span:last-child {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+#hero-book-btn {
+    border-radius: 50px;
+    padding: 0.8rem 2.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+#hero-book-btn:hover {
+    transform: scale(1.05);
 }
 
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+/* 3. Universal Card Styling */
+.event-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
 }
-
-.nav-links a {
-    text-decoration: none;
-    color: var(--text-color);
-    font-weight: 500;
-    transition: color 0.3s ease;
+.event-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
 }
-
-.nav-links a:hover {
-    color: var(--primary-color);
+.event-card .card-img-top {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
 }
-
-.nav-user {
+.event-card .card-title {
     font-weight: 600;
 }
 
-/* Buttons */
-.btn {
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
+/* 4. Ticket Used State */
+.ticket-used {
+    opacity: 0.7;
+    filter: grayscale(80%);
+}
+
+.modal-content {
+    border-radius: 15px; /* ทำให้ขอบ Modal มนสวยงาม */
     border: none;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* สำคัญมาก! เพื่อให้รูปภาพที่เป็น Header มีขอบมนตามไปด้วย */
 }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: #fff;
+.modal-body {
+    padding: 0; /* เราจะจัดการ padding เองในแต่ละส่วน */
 }
 
-.btn-primary:hover {
-    background-color: #5a0eae;
+.modal-header,
+.modal-footer {
+    border: none; /* เอาเส้นขอบน่าเกลียดออก */
 }
 
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    background-color: #1e63d4;
-}
-
-.btn-block {
-    display: block;
+/* 2. Styling for Image Header */
+.modal-image-container {
+    position: relative;
     width: 100%;
-    text-align: center;
+    height: 300px; /* กำหนดความสูงของรูปภาพ Header */
+    background-color: #eee; /* สีพื้นหลังเผื่อรูปโหลดช้า */
 }
 
-
-/* Hero Section */
-.hero-section {
-    text-align: center;
-    padding: 60px 20px;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border-radius: var(--border-radius);
-    margin: 2rem 0;
-}
-
-.hero-section h1 {
-    margin: 0;
-    font-size: 2.8rem;
-}
-
-/* Event Grid & Card */
-.event-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    padding: 2rem 0;
-}
-
-.event-card {
-    background: var(--card-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.event-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.event-image {
+#modalEventImage {
     width: 100%;
-    height: 200px;
+    height: 100%;
+    object-fit: cover; /* ทำให้รูปเต็มพื้นที่โดยไม่เสียสัดส่วน */
+}
+
+/* 3. Styling for Content inside Modal */
+.modal-info-content {
+    padding: 1.5rem 2rem; /* เพิ่มระยะห่างภายใน */
+}
+
+.modal-info-content h2 {
+    font-weight: 700; /* ทำให้ชื่ออีเวนต์เด่นขึ้น */
+}
+
+.modal-info-grid {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+#modalEventCountdown {
+    font-size: 1.5rem; /* ทำให้ Countdown เด่นขึ้น */
+    font-weight: 600;
+}
+
+/* 4. Styling for Modal Footer */
+.modal-footer {
+    background-color: #f8f9fa;
+    padding: 1rem 2rem;
+}
+
+#modalBookButton {
+    border-radius: 50px; /* ทำให้ปุ่มมน */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-weight: 600;
+}
+
+.profile-card {
+    border: none;
+    border-radius: 15px;
+}
+
+.profile-picture-container {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+}
+
+.profile-picture-container img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-.event-info {
-    padding: 20px;
-    flex-grow: 1;
+.auth-container {
+    min-height: 80vh;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: flex; /* ★ 1. สั่งให้เป็น Flex Container (สำคัญที่สุด) ★ */
+    flex-direction: row; /* จัดเรียงจากซ้ายไปขวา */
+}
+
+.auth-form-section {
+    padding: 3rem;
+    flex-basis: 60%; /* ★ 2. กำหนดให้คอลัมน์นี้กว้าง 60% ★ */
+    /* background-color: white; */ /* Bootstrap card จัดการให้แล้ว */
+}
+
+.auth-decorative-section {
+    flex-basis: 40%; /* ★ 3. กำหนดให้คอลัมน์นี้กว้าง 40% ★ */
+    background-image: linear-gradient(-45deg, rgba(108, 29, 171, 0.5), rgba(214, 48, 133, 0.5), rgba(52, 73, 94, 0.6), rgba(39, 174, 96, 0.5));
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    color: white;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end; /* จัดข้อความไปอยู่ด้านล่าง */
+    padding: 3rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
 }
 
-.event-title {
-    margin: 0 0 10px;
-    font-size: 1.25rem;
+.auth-decorative-section h2 {
+    font-weight: 900;
+    font-size: 3rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
 }
 
-.event-date, .event-location {
-    color: #666;
-    margin: 0 0 10px;
+.auth-decorative-section p {
+    font-size: 1.1rem;
+    font-weight: 300;
+    opacity: 0.9;
 }
 
-.event-footer {
-    margin-top: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Keyframes สำหรับ Animation (ถ้ายังไม่มี) */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.event-price {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color);
+/* ปรับสไตล์ของ Tabs */
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: #6c757d;
+}
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-color: #dee2e6 #dee2e6 #fff;
 }
 
-/* Forms */
-.form-container-wrapper {
-    display: flex;
-    gap: 40px;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin: 2rem 0;
+.navbar-custom {
+    /* สร้าง Gradient ที่ซับซ้อนและสวยงาม */
+    background: linear-gradient(
+        -45deg, 
+        #232526, /* Dark grey */
+        #414345, /* Lighter grey */
+        #342b38, /* Dark purple hint */
+        #232526
+    );
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite; /* เรียกใช้ Animation */
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 
-.form-container {
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    flex: 1;
-    max-width: 500px;
+/* 2. Keyframes สำหรับ Animated Gradient */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.form-container h2 {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 20px;
+/* 3. Styling for Links and Buttons */
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+    font-weight: 600;
+    transition: opacity 0.3s ease;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.navbar-custom .nav-link:hover {
+    opacity: 0.8;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
+/* 4. Styling for the Search Form */
+.navbar-search-form {
+    width: 250px; /* กำหนดความกว้างของช่องค้นหา */
 }
 
-.form-group input,
-.form-group textarea {
+/* 5. Styling for the Login button for guests */
+.btn-login {
+    border-width: 2px;
+}
+
+#search-results-list .list-group-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#search-results-list .list-group-item:hover {
+    background-color: #f0f0f0;
+}
+
+.image-preview-box {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; /* Important */
+    height: 250px; /* ความสูงของกล่องพรีวิว */
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: hidden; /* สำคัญมาก! เพื่อให้รูปภาพไม่ล้นกรอบ */
+    transition: all 0.3s ease;
 }
 
-.error-message {
-    color: #e74c3c;
-    text-align: center;
-    margin-top: 15px;
+.image-preview-box:hover {
+    border-color: #0d6efd; /* เปลี่ยนสีขอบเมื่อเอาเมาส์มาวาง */
+    background-color: #e9ecef;
+}
+
+.image-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ทำให้รูปเต็มพื้นที่โดยไม่เสียสัดส่วน */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.image-preview-text {
+    color: #6c757d;
     font-weight: 500;
-}
-
-
-/* Footer */
-.site-footer {
-    text-align: center;
-    padding: 2rem 0;
-    margin-top: 2rem;
-    color: #777;
-    border-top: 1px solid #e0e0e0;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .form-container-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .nav-links {
-        display: none; /* Simple hiding for mobile, can be improved with a burger menu */
-    }
-}
-
-.modal-backdrop {
-    z-index: 1040 !important;
-}
-
-.modal {
-    z-index: 1050 !important;
-}
-
-#image-preview {
-    max-width: 150px;
-    border-radius: 5px;
 }

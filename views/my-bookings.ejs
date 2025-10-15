@@ -1,25 +1,52 @@
 <%- include('partials/header') %>
 
-<h1>My Bookings</h1>
-<p>Here are all the events you've booked.</p>
-<hr>
+    <h1>My Bookings</h1>
+    <p>Here are all the events you've booked.</p>
+    <hr>
 
-<div class="list-group">
-    <% if (bookings && bookings.length > 0) { %>
-        <% bookings.forEach(booking => { %>
-            <div class="list-group-item list-group-item-action flex-column align-items-start">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1"><%= booking.event.name %></h5>
-                    <small>Booked on: <%= new Date(booking.bookingDate).toLocaleDateString('th-TH') %></small>
+<% if (bookings && bookings.length > 0) { %>
+    <% bookings.forEach(booking => { %>
+        <% if (booking.event) { %> 
+            <div class="card mb-3 event-card <%= booking.isCheckedIn ? 'ticket-used' : '' %>">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="<%= booking.event.imageUrl %>" class="img-fluid rounded-start" alt="<%= booking.event.name %>" style="height: 220px; width: 100%; object-fit: cover;">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body d-flex align-items-center h-100">
+                            
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1"><%= booking.event.name %></h5>
+                                <p class="card-text mb-1"><strong>Location:</strong> <%= booking.event.location %></p>
+                                <p class="card-text mb-2"><strong>Event Date:</strong> <%= new Date(booking.event.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %> at <%= booking.event.time %></p>
+                                <p class="card-text"><small class="text-muted"><strong>Price Paid:</strong> <%= booking.price.toLocaleString('en-US') %> THB</small></p>
+                                <small class="text-muted">Booked on: <%= new Date(booking.createdAt).toLocaleDateString('th-TH') %></small>
+                            </div>
+
+                            <div class="text-center ms-3">
+                                <% if (booking.isCheckedIn) { %>
+                                    <div class="text-center p-3 border rounded bg-light" style="width: 150px;">
+                                        <h6 class="text-muted">Checked-in</h6>
+                                        <p class="text-success mb-0 fs-4">✅</p>
+                                        <small class="text-muted">This ticket has been used.</small>
+                                    </div>
+                                <% } else { %>
+                                    <div>
+                                        <div id="qrcode-<%= booking._id %>" class="p-2 bg-white d-inline-block"></div>
+                                        <p class="mb-0 mt-2"><small>Ticket ID:</small></p>
+                                        <code class="user-select-all"><%= booking._id.toString().toUpperCase().substring(18) %></code>
+                                    </div>
+                                <% } %>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-                <p class="mb-1"><strong>Location:</strong> <%= booking.event.location %></p>
-                <p class="mb-1"><strong>Event Date:</strong> <%= new Date(booking.event.date).toLocaleDateString('th-TH') %></p>
-                <small><strong>Price Paid:</strong> <%= booking.price.toLocaleString('en-US') %> THB</small>
             </div>
-        <% }) %>
-    <% } else { %>
-        <div class="alert alert-info">You haven't booked any events yet.</div>
-    <% } %>
-</div>
+        <% } %> 
+    <% }) %>
+<% } else { %>
+    <div class="alert alert-info">You haven't booked any events yet.</div>
+<% } %>
 
-<%- include('partials/footer') %>
+                                <%- include('partials/footer') %>

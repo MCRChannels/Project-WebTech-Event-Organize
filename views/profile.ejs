@@ -1,34 +1,45 @@
 <%- include('partials/header') %>
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <h1>My Profile</h1>
-        <hr>
-        <div class="card p-4">
-            <div class="text-center mb-4">
-                <img src="<%= user.profileImage || 'https://via.placeholder.com/150' %>" alt="Profile Picture" class="img-thumbnail rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
-            </div>
+    <div class="col-md-10 col-lg-8">
+        <div class="card p-4 shadow-sm profile-card">
+            <h1 class="mb-4">My Profile</h1>
             <form id="update-profile-form">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="firstName" class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="firstName" value="<%= user.firstName %>" required>
+                    <div class="col-md-4 text-center">
+                        <div class="profile-picture-container">
+                            <img src="<%= user.profileImage && user.profileImage !== 'default.jpg' ? user.profileImage : '/img/default-avatar.png' %>" 
+                                 alt="Profile Picture"
+                                 id="profile-image-preview" 
+                                 class="img-thumbnail rounded-circle mb-3">
+                        </div>
+                        <label for="newProfileImage" class="btn btn-outline-secondary btn-sm" style="margin-top: 2rem;">Change Picture</label>
+                        <input class="d-none" type="file" id="newProfileImage" accept="image/png, image/jpeg">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="lastName" class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="lastName" value="<%= user.lastName %>" required>
+
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" value="<%= user.firstName %>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" value="<%= user.lastName %>" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="<%= user.username %>" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="<%= user.email %>" disabled>
+                        </div>
+                        <div id="update-success" class="alert alert-success d-none mt-3">Profile updated successfully!</div>
+                        <button type="submit" class="btn btn-dark mt-3">Update Profile</button>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" value="<%= user.username %>" disabled>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" value="<%= user.email %>" required>
-                </div>
-                <div id="update-success" class="alert alert-success d-none">Profile updated successfully!</div>
-                <button type="submit" class="btn btn-primary">Update Profile</button>
             </form>
         </div>
     </div>

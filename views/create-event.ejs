@@ -2,17 +2,26 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h1><%= pageTitle %></h1>
-        <hr>
-        <div class="card p-4">
+        <div class="card p-4 shadow-sm">
+            <h1 class="mb-4"><%= pageTitle %></h1>
             <form id="create-event-form">
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Event Image</label>
+                    <div class="image-preview-box" id="image-preview-container">
+                        <img src="" alt="Image Preview" class="image-preview-img d-none" id="image-preview">
+                        <span class="image-preview-text">Click to upload an image</span>
+                    </div>
+                    <input class="form-control d-none" type="file" id="imageUrl" accept="image/png, image/jpeg" required>
+                </div>
+
                 <div class="mb-3">
                     <label for="name" class="form-label">Event Name</label>
                     <input type="text" class="form-control" id="name" required>
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" rows="3" required></textarea>
+                    <textarea class="form-control" id="description" rows="4" required></textarea>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -20,9 +29,13 @@
                         <input type="date" class="form-control" id="date" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="location" class="form-label">Location</label>
-                        <input type="text" class="form-control" id="location" required>
+                        <label for="time" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="time" required>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" required>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -34,12 +47,16 @@
                         <input type="number" class="form-control" id="price" min="0" required>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label for="imageUrl" class="form-label">Event Image</label>
-                    <input class="form-control" type="file" id="imageUrl" accept="image/png, image/jpeg" required>
-                </div>
+
                 <div id="create-event-error" class="alert alert-danger d-none"></div>
-                <button type="submit" class="btn btn-primary">Create Event</button>
+
+                <div class="mt-4 d-flex align-items-center">
+                    <button type="submit" class="btn btn-dark btn-lg" id="create-event-btn">
+                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                         Create Event
+                    </button>
+                    <a href="/dashboard" class="btn btn-link text-secondary ms-3">Cancel</a>
+                </div>
             </form>
         </div>
     </div>

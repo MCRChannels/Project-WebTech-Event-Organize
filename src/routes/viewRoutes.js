@@ -40,4 +40,13 @@ router.get(
   viewController.getEditEventForm
 );
 
+router.get(
+  '/scanner',
+  authController.protectView,
+  authController.restrictViewTo('organizer', 'admin'),
+  (req, res) => { res.render('scanner', { pageTitle: 'Ticket Scanner' }); }
+);
+
+router.get('/search', viewController.getSearchResults);
+router.get('/checkout/:eventId', authController.protectView, viewController.getCheckoutPage);
 module.exports = router;

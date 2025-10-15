@@ -70,49 +70,54 @@ exports.getAdminPanelPage = async (req, res) => {
 
 exports.getDashboardPage = async (req, res) => {
     try {
-        const events = await Event.find({ organizer: req.user.id })
-            .lean()
-            .sort({ date: -1 });
-
-        if (events.length === 0) {
-            return res.render('dashboard', {
-                pageTitle: 'My Dashboard',
-                events: [],
-                totalTicketsSold: 0,
-                totalRevenue: 0
-            });
-        }
-
-        const eventIds = events.map(event => event._id);
-
-        const bookings = await Booking.find({ event: { $in: eventIds } })
-            .populate({ path: 'attendee', select: 'firstName lastName email' });
-
-        const bookingsByEvent = new Map();
-        bookings.forEach(booking => {
-            const eventIdString = booking.event.toString();
-            if (!bookingsByEvent.has(eventIdString)) {
-                bookingsByEvent.set(eventIdString, []);
+        // ★★★ ใช้ Aggregation Pipeline เพื่อดึงและรวมข้อมูลในครั้งเดียว ★★★
+        const eventsWithAttendees = await Event.aggregate([
+            // 1. ค้นหาเฉพาะ Event ที่เป็นของ Organizer คนนี้
+            {
+                $match: { organizer: req.user._id }
+            },
+            // 2. ทำการ "LEFT JOIN" กับ Collection 'bookings'
+            {
+                $lookup: {
+                    from: 'bookings', // ชื่อ collection ของ bookings ใน database (ปกติจะเป็นพหูพจน์ตัวเล็ก)
+                    localField: '_id', // field จาก collection 'events'
+                    foreignField: 'event', // field จาก collection 'bookings'
+                    as: 'attendeeBookings' // ตั้งชื่อ field ใหม่ที่จะเก็บผลลัพธ์การ join
+                }
+            },
+            // 3. (Optional but recommended) ทำการ "JOIN" อีกครั้งเพื่อดึงข้อมูลของ User
+            {
+                $lookup: {
+                    from: 'users', // ชื่อ collection ของ users
+                    localField: 'attendeeBookings.attendee',
+                    foreignField: '_id',
+                    as: 'attendeeDetails'
+                }
+            },
+            // 4. จัดเรียงผลลัพธ์ตามวันที่
+            {
+                $sort: { date: -1 }
             }
-            bookingsByEvent.get(eventIdString).push(booking);
-        });
-
-        let totalTicketsSold = 0;
-        let totalRevenue = 0;
-        events.forEach(event => {
-            const bookingsForThisEvent = event.bookings ?? [];
-            totalTicketsSold += bookingsForThisEvent.length;
-            totalRevenue += bookingsForThisEvent.length * event.price;
+        ]);
+        
+        // 5. จัดรูปแบบข้อมูลใหม่ให้ EJS ใช้งานง่าย
+        // (เราต้องทำขั้นตอนนี้เพราะ $lookup จะคืนค่าโครงสร้างที่ซับซ้อน)
+        eventsWithAttendees.forEach(event => {
+            // attendeeDetails จะมีข้อมูล user ทั้งหมด เราจะ map เอาเฉพาะที่จำเป็น
+            event.attendees = event.attendeeDetails.map(user => ({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email
+            }));
         });
 
         res.render('dashboard', {
-            pageTitle: 'My Dashboard',
-            events,
-            totalTicketsSold,
-            totalRevenue
+            pageTitle: 'Organizer Dashboard',
+            events: eventsWithAttendees // ส่งข้อมูลที่ผ่านการ Aggregate แล้วไป
         });
+
     } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Error fetching dashboard data with aggregation:", error);
         res.status(500).send("Error loading dashboard");
     }
 }
@@ -130,10 +135,67 @@ exports.getEditEventForm = async (req, res) => {
         }
 
         res.render('edit-event', {
-            pageTitle: `Edit: ${event.name}`,
+            pageTitle: `Editing: ${event.name}`,
             event: event
         });
     } catch (error) {
         res.status(500).send('Error loading the edit page.');
+    }
+};
+
+exports.getHomepage = async (req, res) => {
+    try {
+        // 1. ค้นหาอีเวนต์ทั้งหมดที่ยังมาไม่ถึง (วันที่ >= วันนี้)
+        const allUpcomingEvents = await Event.find({ date: { $gte: new Date() } })
+                                             .sort({ date: 1 }) // 2. เรียงจากวันที่ใกล้ที่สุดไปไกลที่สุด
+                                             .populate('organizer', 'firstName lastName');
+
+        // 3. แยกอีเวนต์ที่ใกล้ที่สุด (ตัวแรก) ออกมา
+        const nextEvent = allUpcomingEvents.shift(); // .shift() จะดึงตัวแรกออกจาก array
+
+        // 4. ที่เหลือใน array คือ upcoming events
+        const upcomingEvents = allUpcomingEvents;
+
+        res.render('index', {
+            pageTitle: 'Home',
+            nextEvent: nextEvent, // ส่งอีเวนต์หลักไป
+            upcomingEvents: upcomingEvents // ส่งลิสต์อีเวนต์ที่เหลือไป
+        });
+    } catch (error) {
+        console.error("Error fetching events for homepage:", error);
+        res.render('index', { pageTitle: 'Home', nextEvent: null, upcomingEvents: [] });
+    }
+};
+
+exports.getSearchResults = async (req, res) => {
+    try {
+        const query = req.query.q || ''; // ดึงคำค้นหาจาก URL
+        
+        // ใช้ Regular Expression เพื่อค้นหาแบบ "contains" และไม่สนตัวพิมพ์เล็ก/ใหญ่
+        const events = await Event.find({
+            name: { $regex: query, $options: 'i' }
+        }).sort({ date: 1 });
+
+        res.render('search-results', {
+            pageTitle: `Search results for "${query}"`,
+            events: events,
+            query: query
+        });
+    } catch (error) {
+        // ... handle error ...
+    }
+};
+
+exports.getCheckoutPage = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.eventId);
+        if (!event) return res.status(404).send('Event not found');
+
+        res.render('payment', {
+            pageTitle: 'Checkout',
+            event: event
+        });
+    } catch (error) {
+        res.status(500).send('Error loading checkout page.');
     }
 };

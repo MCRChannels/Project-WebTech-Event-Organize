@@ -15,6 +15,10 @@ const bookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    isCheckedIn:{
+        type: Boolean,
+        default: false
+    },
     createAt: {
         type: Date,
         default: Date.now()
@@ -27,7 +31,7 @@ const bookingSchema = new mongoose.Schema({
 bookingSchema.pre(/^find/, function (next) {
     this.populate('attendee').populate({
         path: 'event',
-        select: 'name date location'
+        select: 'name date location imageUrl'
     });
     next();
 });

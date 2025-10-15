@@ -8,6 +8,7 @@ exports.createEvent = async (req, res) => {
             name: req.body.name,
             description: req.body.description,
             date: req.body.date,
+            time: req.body.time,
             location: req.body.location,
             ticketAvailable: req.body.ticketAvailable, 
             price: req.body.price,
@@ -85,43 +86,51 @@ exports.getEvent = async (req, res) => {
 };
 
 exports.updateEvent = async (req, res) => {
-    try {
-        // 1. ค้นหาอีเวนต์จาก ID ที่ส่งมาใน URL
-        const event = await Event.findById(req.params.id);
+  try {
+    const event = await Event.findById(req.params.id);
 
-        // 2. ตรวจสอบว่ามีอีเวนต์นี้อยู่จริงหรือไม่
-        if (!event) {
-            return res.status(404).json({ status: 'fail', message: 'No event found with that ID' });
-        }
-
-        // 3. ★★★ ตรวจสอบความเป็นเจ้าของ ★★★
-        // เช็คว่า ID ของ user ที่ล็อกอินอยู่ (req.user.id) ตรงกับ ID ของ organizer ที่สร้างอีเวนต์นี้หรือไม่
-        if (event.organizer.toString() !== req.user.id) {
-            return res.status(403).json({ status: 'fail', message: 'You do not have permission to update this event.' });
-        }
-
-        // 4. (Optional) ถ้ามีการส่งไฟล์รูปภาพใหม่มาด้วย ให้อัปเดต imageUrl
-        if (req.file) {
-            req.body.imageUrl = req.file.path;
-        }
-
-        // 5. ทำการอัปเดตข้อมูล
-        // req.body จะมีเฉพาะ field ที่เราต้องการแก้ไข
-        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {
-            new: true, // คืนค่า document ที่อัปเดตแล้ว
-            runValidators: true // สั่งให้ Mongoose ตรวจสอบข้อมูลใหม่ตาม Schema ด้วย
-        });
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                event: updatedEvent
-            }
-        });
-    } catch (error) {
-        console.error('UPDATE EVENT ERROR:', error);
-        res.status(400).json({ status: 'fail', message: error.message });
+    if (!event) {
+      return res.status(404).json({ status: 'fail', message: 'No event found with that ID' });
     }
+
+    // ตรวจสอบความเป็นเจ้าของ
+    if (event.organizer.toString() !== req.user.id) {
+      return res.status(403).json({ status: 'fail', message: 'You do not have permission to update this event.' });
+    }
+
+    // สร้าง object สำหรับเก็บข้อมูลที่จะอัปเดต
+    const updates = { ...req.body };
+
+    // ★★★ อัปเกรด Logic การอัปเดตรูปภาพ ★★★
+    if (req.file) {
+      // แปลง Buffer เป็น Data URI
+      const b64 = Buffer.from(req.file.buffer).toString('base64');
+      let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
+      
+      // สั่งอัปโหลดไปยัง Cloudinary
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: 'event-ticketing/event_images'
+      });
+      
+      // นำ URL ที่ได้มาใส่ใน object ที่จะอัปเดต
+      updates.imageUrl = result.secure_url;
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        event: updatedEvent
+      }
+    });
+  } catch (error) {
+    console.error('UPDATE EVENT ERROR:', error);
+    res.status(400).json({ status: 'fail', message: error.message });
+  }
 };
 
 // --- สำหรับ Organizer: ลบอีเวนต์ของตัวเอง ---
@@ -147,4 +156,53 @@ exports.deleteEvent = async (req, res) => {
     } catch (error) {
         res.status(500).json({ status: 'fail', message: 'Something went wrong.' });
     }
+};
+
+// --- สำหรับ Organizer: ดูรายชื่อคนจองอีเวนต์ของตัวเอง ---
+exports.getEventBookings = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found.' });
+    }
+
+    // ★★★ ตรวจสอบความเป็นเจ้าของ ★★★
+    if (event.organizer.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You are not the organizer of this event.' });
+    }
+
+    // ค้นหา booking ทั้งหมดของ event นี้ และ populate ข้อมูล attendee
+    const bookings = await Booking.find({ event: req.params.id })
+                                    .populate('attendee', 'firstName lastName email profileImage');
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        bookings
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+};
+
+exports.searchEventsAutocomplete = async (req, res) => {
+  try {
+    const query = req.query.q || '';
+    if (!query) {
+      return res.json([]); // ส่ง array ว่างกลับไปถ้าไม่มี query
+    }
+
+    // ค้นหาอีเวนต์ที่ชื่อมีส่วนของ query (ไม่สนตัวพิมพ์เล็ก/ใหญ่)
+    const events = await Event.find({
+      name: { $regex: query, $options: 'i' }
+    }).select('name _id').limit(5); // ดึงมาแค่ name และ id, จำกัดที่ 5 ผลลัพธ์
+
+    // เราจะส่งกลับไปแค่ array ของ events เพื่อให้ JS ทำงานง่ายขึ้น
+    res.status(200).json(events);
+
+  } catch (error) {
+    console.error('AUTOCOMPLETE SEARCH ERROR:', error);
+    res.status(500).json([]); // ถ้า error ให้ส่ง array ว่างกลับไป
+  }
 };
