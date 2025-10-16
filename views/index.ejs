@@ -135,8 +135,15 @@
                                 <span id="modal-free-display" class="d-none">
                                     <span class="badge bg-success fs-4">FREE</span>
                                 </span>
-                                <span class="badge bg-secondary ms-2">Tickets Left: <span
-                                        id="modalEventTickets"></span></span>
+
+                                <span id="ticket-status-container" class="ms-2">
+                                    <span class="badge bg-secondary" id="tickets-left-display">
+                                        Tickets Left: <span id="modalEventTickets"></span>
+                                    </span>
+                                    <span class="badge bg-danger fs-6 d-none" id="sold-out-display">
+                                        SOLD OUT
+                                    </span>
+                                </span>
                             </div>
 
                             <button type="button" class="btn btn-success btn-lg d-none" id="modalBookButton"

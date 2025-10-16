@@ -1,8 +1,22 @@
 <%- include('partials/header') %>
-    <main class="container mb-4">
-        <h1>Ticket Scanner</h1>
-        <p>Point your camera at an E-Ticket QR Code to check-in an attendee.</p>
-        <div id="qr-reader" style="width: 500px"></div>
-        <div id="qr-reader-results" class="mt-3"></div>
-    </main>
-    <%- include('partials/footer') %>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-4">
+                <h1 class="card-title">Ticket Scanner</h1>
+                <p class="card-text text-muted">Point your camera at an E-Ticket QR Code to check-in an attendee.</p>
+                
+                <div id="qr-reader" class="mx-auto" style="width: 90%; max-width: 400px;"></div>
+                
+                <div id="qr-reader-results" class="mt-3"></div>
+                
+                <button id="scan-again-btn" class="btn btn-dark mt-3 d-none">
+                    Scan Another Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

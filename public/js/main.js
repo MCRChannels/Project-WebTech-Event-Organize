@@ -278,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventId = button.getAttribute('data-event-id');
             modalElements.name.textContent = 'Loading...';
 
+            const ticketsLeftDisplay = document.getElementById('tickets-left-display');
+            const soldOutDisplay = document.getElementById('sold-out-display');
+
             try {
                 const res = await fetch(`/api/v1/events/${eventId}`);
                 const data = await res.json();
@@ -320,17 +323,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                         modalElements.countdown.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
                     };
-                    updateCountdown(); 
-                    countdownInterval = setInterval(updateCountdown, 1000); 
+                    updateCountdown();
+                    countdownInterval = setInterval(updateCountdown, 1000);
 
                     // ★★★ Logic แสดง/ซ่อน และตั้งค่าปุ่ม Booking ★★★
                     const userRole = document.body.getAttribute('data-user-role');
-                    if (userRole === 'attendee' && eventData.ticketAvailable > 0) {
-                        modalElements.bookButton.classList.remove('d-none');
-                        modalElements.bookButton.dataset.eventId = eventId;
-                        modalElements.bookButton.textContent = eventData.price > 0 ? 'Proceed to Checkout' : 'Book For Free';
+
+
+                    if (eventData.ticketAvailable <= 0) {
+                        // --- กรณีตั๋วหมด (SOLD OUT) ---
+                        soldOutDisplay.classList.remove('d-none'); // แสดงป้าย SOLD OUT
+                        ticketsLeftDisplay.classList.add('d-none'); // ซ่อนป้าย Tickets Left
+                        modalElements.bookButton.classList.add('d-none'); // ซ่อนปุ่มจองเสมอ
                     } else {
-                        modalElements.bookButton.classList.add('d-none');
+                        // --- กรณีตั๋วยังมี ---
+                        soldOutDisplay.classList.add('d-none'); // ซ่อนป้าย SOLD OUT
+                        ticketsLeftDisplay.classList.remove('d-none'); // แสดงป้าย Tickets Left
+                        modalElements.tickets.textContent = eventData.ticketAvailable;
+
+                        if (userRole === 'attendee') {
+                            modalElements.bookButton.classList.remove('d-none');
+                            modalElements.bookButton.dataset.eventId = eventId;
+                            modalElements.bookButton.textContent = eventData.price > 0 ? 'Proceed to Checkout' : 'Book For Free';
+                        } else {
+                            modalElements.bookButton.classList.add('d-none');
+                        }
                     }
                 } else {
                     modalElements.name.textContent = 'Error: ' + data.message;
@@ -570,15 +587,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrReaderDiv = document.getElementById('qr-reader');
     if (qrReaderDiv) {
         const resultsDiv = document.getElementById('qr-reader-results');
+        const scanAgainBtn = document.getElementById('scan-again-btn');
+
+        // ฟังก์ชันสำหรับจัดการเมื่อสแกนสำเร็จ
         const onScanSuccess = async (decodedText, decodedResult) => {
-            resultsDiv.innerHTML = `<div class="alert alert-info">Verifying ticket...</div>`;
+            // ★ 1. หยุดการทำงานของกล้องทันที! ★
             try {
+                await html5QrcodeScanner.clear();
+            } catch (err) {
+                console.error("Failed to clear scanner:", err);
+            }
+
+            // แสดงสถานะกำลังตรวจสอบ
+            resultsDiv.innerHTML = `<div class="alert alert-info">Verifying ticket ID: ${decodedText}...</div>`;
+
+            try {
+                // ส่ง ID ไปที่ API เพื่อ verify
                 const res = await fetch('/api/v1/bookings/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bookingId: decodedText })
                 });
                 const data = await res.json();
+
+                // ★ 2. แสดงผลลัพธ์ตามที่ API ตอบกลับมา ★
                 if (data.status === 'success') {
                     resultsDiv.innerHTML = `<div class="alert alert-success"><strong>Success!</strong> Ticket is valid. Check-in complete.</div>`;
                 } else {
@@ -586,10 +618,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 resultsDiv.innerHTML = `<div class="alert alert-danger"><strong>Error!</strong> Could not connect to the server.</div>`;
+            } finally {
+                // ★ 3. แสดงปุ่ม "Scan Another Ticket" ขึ้นมาเสมอ ★
+                scanAgainBtn.classList.remove('d-none');
             }
+        };
+
+        // สร้าง object ของ Scanner
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "qr-reader",
+            { fps: 10, qrbox: { width: 250, height: 250 } }
+        );
+
+        // ฟังก์ชันสำหรับเริ่มการทำงานของ Scanner
+        function startScanner() {
+            resultsDiv.innerHTML = ''; // เคลียร์ผลลัพธ์เก่า
+            scanAgainBtn.classList.add('d-none'); // ซ่อนปุ่ม
+            html5QrcodeScanner.render(onScanSuccess); // เริ่มการทำงานของกล้อง
         }
-        const html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: { width: 250, height: 250 } });
-        html5QrcodeScanner.render(onScanSuccess);
+
+        // ★ 4. เพิ่ม Listener ให้กับปุ่ม "Scan Again" ★
+        scanAgainBtn.addEventListener('click', () => {
+            startScanner();
+        });
+
+
+        startScanner();
     }
 
     // --- BLOCK 6: ADMIN PANEL LOGIC ---
